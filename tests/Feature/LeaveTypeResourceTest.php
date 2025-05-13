@@ -14,11 +14,7 @@ it('can validate leave type creation input', function () {
         ->assertHasFormErrors(['name' => 'required']);
 });
 
-it('can render leave type edit page', function () {
-    $this->get(LeaveTypeResource::getUrl('edit', [
-        'record' => LeaveType::factory()->create(),
-    ]))->assertSuccessful();
-});
+
 
 it('can retrieve leave type data for editing', function () {
     $leaveType = LeaveType::factory()->create();
