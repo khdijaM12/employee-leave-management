@@ -37,7 +37,7 @@ class EmployeeResource extends Resource
               TextInput::make('employee_name')
                     ->required()
                     ->label('اسم الموظف'),
-                
+                    
                 TextInput::make('email')
                     ->required()
                     ->email()
@@ -79,12 +79,13 @@ class EmployeeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->defaultSort('employee_name', 'asc')
             ->columns([
-                 TextColumn::make('employee_name')->label('اسم الموظف')->searchable(),
+                TextColumn::make('employee_name')->label('اسم الموظف')->searchable(),
+                TextColumn::make('email')->label('البريد الالكتروني')->searchable(),
                 TextColumn::make('employee_number')->label('رقم الموظف'),
                 TextColumn::make('mobile_number')->label('رقم الهاتف'),
-                TextColumn::make('mobile_number')->label('البريد الالكتروني'),
-                TextColumn::make('email')->label('العنوان'),
+                TextColumn::make('address')->label('العننوان'),
                 TextColumn::make('notes')->label('ملاحظات')->limit(30),
                 TextColumn::make('created_at')->label('تاريخ الإنشاء')->dateTime('Y-m-d H:i'),
             ])
@@ -117,4 +118,9 @@ class EmployeeResource extends Resource
             'edit' => Pages\EditEmployee::route('/{record}/edit'),
         ];
     }
-}
+
+    public static function canViewAny(): bool
+    {
+        return true;    
+    }
+    }

@@ -12,9 +12,10 @@ abstract class TestCase extends BaseTestCase
     use RefreshDatabase;
 
     protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->actingAs(User::factory()->create());
-    }
+{
+    parent::setUp();
+    
+    $user = \App\Models\User::factory()->create();
+    $this->actingAs($user);
+}
 }
