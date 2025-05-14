@@ -33,54 +33,60 @@ class LeaveRequestResource extends Resource
                 Select::make('employee_id')
                     ->relationship('employee', 'employee_name')
                     ->label('الموظف')
-                    ->required(),
+                    ->required()
+                    ->visible(fn (string $operation): bool => $operation === 'create'),
 
                 Select::make('leave_type_id')
                     ->relationship('leaveType', 'name')
                     ->label('نوع الإجازة')
-                    ->required(),
+                    ->required()
+                    ->visible(fn (string $operation): bool => $operation === 'create'),
 
                 Textarea::make('reason')
                     ->label('سبب الإجازة')
-                    ->required(),
+                    ->required()
+                    ->visible(fn (string $operation): bool => $operation === 'create'),
 
                 DatePicker::make('start_date')
                     ->label('تاريخ البدء')
                     ->required()
-                    ->minDate(now()),
+                    ->minDate(now())
+                    ->visible(fn (string $operation): bool => $operation === 'create'),
 
                 DatePicker::make('end_date')
                     ->label('تاريخ الانتهاء')
                     ->required()
+                    ->minDate(now())
                     ->after('start_date')
                     ->rule(function (\Filament\Forms\Get $get) {
-                    return function (string $attribute, $value, \Closure $fail) use ($get) {
-                        $employeeId = $get('employee_id');
-                        $startDate = $get('start_date');
-                        $endDate = $value;
+                        return function (string $attribute, $value, \Closure $fail) use ($get) {
+                            $employeeId = $get('employee_id');
+                            $startDate = $get('start_date');
+                            $endDate = $value;
 
-                        if (!$employeeId || !$startDate || !$endDate) return;
+                            if (!$employeeId || !$startDate || !$endDate) return;
 
-                        $exists = \App\Models\LeaveRequest::where('employee_id', $employeeId)
-                            ->where(function ($query) use ($startDate, $endDate) {
-                                $query->whereBetween('start_date', [$startDate, $endDate])
-                                    ->orWhereBetween('end_date', [$startDate, $endDate])
-                                    ->orWhere(function ($query) use ($startDate, $endDate) {
-                                        $query->where('start_date', '<=', $startDate)
-                                                ->where('end_date', '>=', $endDate);
-                                    });
-                            })
-                            ->exists();
+                            $exists = \App\Models\LeaveRequest::where('employee_id', $employeeId)
+                                ->where(function ($query) use ($startDate, $endDate) {
+                                    $query->whereBetween('start_date', [$startDate, $endDate])
+                                        ->orWhereBetween('end_date', [$startDate, $endDate])
+                                        ->orWhere(function ($query) use ($startDate, $endDate) {
+                                            $query->where('start_date', '<=', $startDate)
+                                                    ->where('end_date', '>=', $endDate);
+                                        });
+                                })
+                                ->exists();
 
-                        if ($exists) {
-                            $fail('يوجد بالفعل طلب إجازة لنفس الموظف خلال هذه الفترة.');
-                        }
-                    };
-                }),
-
+                            if ($exists) {
+                                $fail('يوجد بالفعل طلب إجازة لنفس الموظف خلال هذه الفترة.');
+                            }
+                        };
+                    })
+                    ->visible(fn (string $operation): bool => $operation === 'create'),
 
                 Textarea::make('notes')
-                    ->label('ملاحظات إضافية'),
+                    ->label('ملاحظات إضافية')
+                    ->visible(fn (string $operation): bool => $operation === 'create'),
 
                 Select::make('status')
                     ->label('الحالة')
@@ -90,7 +96,8 @@ class LeaveRequestResource extends Resource
                         'rejected' => 'مرفوضة',
                     ])
                     ->default('pending')
-                    ->required(),
+                    ->required()
+                    ->visible(fn (string $operation): bool => $operation !== 'create'),
             ]);
     }
 

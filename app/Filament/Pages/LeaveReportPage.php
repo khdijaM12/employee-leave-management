@@ -12,6 +12,8 @@ class LeaveReportPage extends Page
 
     protected static string $view = 'filament.pages.leave-report-page';
 
+    protected static ?string $navigationLabel = 'تقارير الإجازات';
+
     protected function getHeaderActions(): array
 {
     return [
