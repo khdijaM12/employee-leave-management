@@ -9,3 +9,6 @@ Route::get('/', function () {
 
 Route::get('/generate-leave-report', [LeaveRequestController::class, 'generateLeaveReport'])->name('generate-leave-report');;
 
+Route::get('/leave-request', function () {
+    return view('leave-request');
+});
