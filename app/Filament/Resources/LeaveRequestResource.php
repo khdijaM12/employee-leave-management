@@ -46,11 +46,38 @@ class LeaveRequestResource extends Resource
 
                 DatePicker::make('start_date')
                     ->label('تاريخ البدء')
-                    ->required(),
+                    ->required()
+                    ->minDate(now()),
 
                 DatePicker::make('end_date')
                     ->label('تاريخ الانتهاء')
-                    ->required(),
+                    ->required()
+                    ->after('start_date')
+                    ->rule(function (\Filament\Forms\Get $get) {
+                    return function (string $attribute, $value, \Closure $fail) use ($get) {
+                        $employeeId = $get('employee_id');
+                        $startDate = $get('start_date');
+                        $endDate = $value;
+
+                        if (!$employeeId || !$startDate || !$endDate) return;
+
+                        $exists = \App\Models\LeaveRequest::where('employee_id', $employeeId)
+                            ->where(function ($query) use ($startDate, $endDate) {
+                                $query->whereBetween('start_date', [$startDate, $endDate])
+                                    ->orWhereBetween('end_date', [$startDate, $endDate])
+                                    ->orWhere(function ($query) use ($startDate, $endDate) {
+                                        $query->where('start_date', '<=', $startDate)
+                                                ->where('end_date', '>=', $endDate);
+                                    });
+                            })
+                            ->exists();
+
+                        if ($exists) {
+                            $fail('يوجد بالفعل طلب إجازة لنفس الموظف خلال هذه الفترة.');
+                        }
+                    };
+                }),
+
 
                 Textarea::make('notes')
                     ->label('ملاحظات إضافية'),
